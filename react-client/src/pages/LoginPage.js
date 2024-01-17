@@ -1,25 +1,58 @@
+// LoginPage.js
+
 import React, { useState } from "react";
-import { Link, useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
-function LoginPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-
-  const { attemptLogin } = useOutletContext();
+function LoginPage({ setCurrentUser }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+  const attemptLogin = async (credentials) => {
+    try {
+      console.log(credentials)
+      const response = await fetch("http://127.0.0.1:5000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setCurrentUser(userData.user_data); // Update the current user state with user_data
+        console.log("Login successful");
+
+        // NOTE:  Now that we have login credentials for a user,
+        //        we gotta SEND that to all components/pages that
+        //        need the user creds. We'll do this using state
+        //        (we're already saving the current user to state on
+        //        Line 24). Once we have user data in state passed to 
+        //        the exercises (and individual exercises), conditionally
+        //        load a "Save to Favorites" button on an exercise's details
+        //        page IF AND ONLY IF a user is currently logged in.q
+
+        navigate('/');
+      } else {
+        console.error("Login failed:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error during login:", error.message);
+    }
+  };
 
   const handleChangeUsername = (e) => setUsername(e.target.value);
   const handleChangePassword = (e) => setPassword(e.target.value);
 
-  function handleSubmit(e) {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     attemptLogin({ username, password });
-    navigate('/');
-  }
+  };
 
   return (
     <>
-      <form className="user-form" onSubmit={handleSubmit}>
+      <form className="user-form" onSubmit={handleFormSubmit}>
         <input
           type="text"
           onChange={handleChangeUsername}
@@ -27,7 +60,7 @@ function LoginPage() {
           placeholder="Username..."
         />
         <input
-          type="password"  // Corrected type to "password"
+          type="password"
           onChange={handleChangePassword}
           value={password}
           placeholder="Password..."
@@ -49,3 +82,4 @@ function LoginPage() {
 }
 
 export default LoginPage;
+

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useOutletContext, useNavigate, Link } from "react-router-dom";
 
-function SignUpPage() {
+function SignUpPage({ setCurrentUser}) {
   const [first_name, setFirst_Name] = useState("");
   const [last_name, setLast_Name] = useState("");
   const [city, setCity] = useState("");
@@ -21,6 +21,27 @@ function SignUpPage() {
   const handleChangeUsername = (e) => setUsername(e.target.value);
   const handleChangePassword = (e) => setPassword(e.target.value);
 
+  const attemptSignup = async (userData) => {
+    console.log(userData)
+    try {
+      const response = await fetch("http://127.0.0.1:5000/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (response.ok) {
+        setCurrentUser(response)
+        console.log("User signed up successfully");
+      } else {
+        console.error("Signup failed:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error during signup:", error.message);
+    }
+  };
   function handleFormSubmit(event) {
     event.preventDefault();
     attemptSignup({
@@ -42,7 +63,7 @@ function SignUpPage() {
   };
 
   const buttonStyle = {
-    backgroundColor: '#3498db', // Blue color
+    backgroundColor: '#3498db', 
     color: '#fff',
     padding: '10px',
     border: 'none',
@@ -51,7 +72,7 @@ function SignUpPage() {
   };
 
   const buttonHoverStyle = {
-    backgroundColor: '#2980b9', // Darker blue on hover
+    backgroundColor: '#2980b9', 
   };
 
   const loginLinkStyle = {
